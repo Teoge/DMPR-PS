@@ -1,0 +1,4 @@
+.vscode
+.pylintrc
+__pycache__
+weights/*
