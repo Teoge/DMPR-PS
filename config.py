@@ -3,10 +3,14 @@ import argparse
 
 
 INPUT_IMAGE_SIZE = 512
-# 0: confidence, 1: offset_x, 2: offset_y, 3: cos(direction), 4: sin(direction)
-NUM_FEATURE_MAP_CHANNEL = 5
+# 0: confidence, 1: point_shape, 2: offset_x, 3: offset_y, 4: cos(direction),
+# 5: sin(direction)
+NUM_FEATURE_MAP_CHANNEL = 6
 # image_size / 2^5 = 512 / 32 = 16
 FEATURE_MAP_SIZE = 16
+# Thresholds to determine whether an detected point match ground truth.
+SQUARED_DISTANCE_THRESH = 0.0003
+DIRECTION_ANGLE_THRESH = 0.5
 
 
 def add_common_arguments(parser):
@@ -17,7 +21,7 @@ def add_common_arguments(parser):
                         help="Depth factor.")
     parser.add_argument('--disable_cuda', action='store_true',
                         help="Disable CUDA.")
-    parser.add_argument('--gpu_id', type=int, default=1,
+    parser.add_argument('--gpu_id', type=int, default=0,
                         help="Select which gpu to use.")
 
 
@@ -28,8 +32,10 @@ def get_parser_for_training():
                         help="The location of dataset.")
     parser.add_argument('--optimizer_weights',
                         help="The weights of optimizer.")
-    parser.add_argument('--batch_size', type=int, default=16,
+    parser.add_argument('--batch_size', type=int, default=24,
                         help="Batch size.")
+    parser.add_argument('--data_loading_workers', type=int, default=24,
+                        help="Number of workers for data loading.")
     parser.add_argument('--num_epochs', type=int, default=100,
                         help="Number of epochs to train for.")
     parser.add_argument('--lr', type=float, default=1e-3,
@@ -37,6 +43,20 @@ def get_parser_for_training():
     parser.add_argument('--enable_visdom', action='store_true',
                         help="Enable Visdom to visualize training progress")
     add_common_arguments(parser)
+    return parser
+
+
+def get_parser_for_evaluation():
+    """Return argument parser for testing."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_directory', required=True,
+                        help="The location of dataset.")
+    parser.add_argument('--batch_size', type=int, default=24,
+                        help="Batch size.")
+    parser.add_argument('--data_loading_workers', type=int, default=24,
+                        help="Number of workers for data loading.")
+    parser.add_argument('--enable_visdom', action='store_true',
+                        help="Enable Visdom to visualize training progress")
     return parser
 
 

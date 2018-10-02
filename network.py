@@ -23,7 +23,7 @@ def define_expand_unit(basic_channel_size):
 
 
 def define_halve_unit(basic_channel_size):
-    """Define a 3x3 expand stride 2 convolution with norm and activation."""
+    """Define a 4x4 stride 2 expand convolution with norm and activation."""
     conv = nn.Conv2d(basic_channel_size, 2 * basic_channel_size, kernel_size=4,
                      stride=2, padding=1, bias=False)
     norm = nn.BatchNorm2d(2 * basic_channel_size)

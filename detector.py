@@ -57,7 +57,9 @@ class DirectionalPointDetector(nn.modules.Module):
     def forward(self, *x):
         feature = self.extract_feature(x[0])
         prediction = self.predict(feature)
-        point_pred, angle_pred = torch.split(prediction, 3, dim=1)
-        point_pred = nn.functional.sigmoid(point_pred)
-        angle_pred = nn.functional.tanh(angle_pred)
+        # 4 represents that there are 4 value: confidence, shape, offset_x,
+        # offset_y, whose range is between [0, 1].
+        point_pred, angle_pred = torch.split(prediction, 4, dim=1)
+        point_pred = torch.sigmoid(point_pred)
+        angle_pred = torch.tanh(angle_pred)
         return torch.cat((point_pred, angle_pred), dim=1)
