@@ -1,4 +1,4 @@
-"""Universal procedure of calculating average precision defined in VOC"""
+"""Universal procedure of calculating precision and recall."""
 
 
 def match_gt_with_preds(ground_truth, predictions, match_labels):

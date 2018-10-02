@@ -1,11 +1,8 @@
-from collections import namedtuple
+"""Defines data structure and related function to process these data."""
 import math
 import torch
 import config
-
-
-MarkingPoint = namedtuple('MarkingPoint', ['x', 'y', 'direction', 'shape'])
-Slot = namedtuple('Slot', ['x1', 'y1', 'x2', 'y2'])
+from . import MarkingPoint
 
 
 def generate_objective(marking_points_batch, device):

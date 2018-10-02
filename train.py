@@ -3,12 +3,11 @@ import random
 import torch
 from torch.utils.data import DataLoader
 import config
-from data import get_predicted_points
-from data import generate_objective
-from dataset import ParkingSlotDataset
-from detector import DirectionalPointDetector
-from log import Logger
-from utils import tensor2im
+from data.data_process import get_predicted_points, generate_objective
+from data.dataset import ParkingSlotDataset
+from model.detector import DirectionalPointDetector
+from util.log import Logger
+from util import tensor2im
 
 
 def plot_prediction(logger, image, marking_points, prediction):

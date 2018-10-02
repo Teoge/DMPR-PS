@@ -1,4 +1,4 @@
-"""Common network struture unit definition."""
+"""Universal network struture unit definition."""
 from torch import nn
 
 

@@ -1,15 +1,12 @@
 """Evaluate directional marking point detector."""
 import torch
 from torch.utils.data import DataLoader
-from precision_recall import calc_average_precision
-from precision_recall import calc_precision_recall
 import config
-from data import generate_objective
-from data import get_predicted_points
-from data import match_marking_points
-from dataset import ParkingSlotDataset
-from detector import DirectionalPointDetector
-from log import Logger
+from data.data_process import generate_objective, get_predicted_points, match_marking_points
+from data.dataset import ParkingSlotDataset
+from model.detector import DirectionalPointDetector
+from util.log import Logger
+from util.precision_recall import calc_average_precision, calc_precision_recall
 
 
 def evaluate_detector(args):

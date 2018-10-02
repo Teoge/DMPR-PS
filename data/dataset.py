@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
+"""Defines the parking slot dataset for directional marking point detection."""
 import json
 import os
 import os.path
 import cv2 as cv
 from torch.utils.data import Dataset
 from torchvision import transforms
-from data import MarkingPoint
+from . import MarkingPoint
 
 
 class ParkingSlotDataset(Dataset):

@@ -5,9 +5,9 @@ import numpy as np
 import torch
 from torchvision.transforms import ToTensor
 import config
-from data import get_predicted_points
-from detector import DirectionalPointDetector
-from utils import Timer
+from data.data_process import get_predicted_points
+from model.detector import DirectionalPointDetector
+from util import Timer
 
 
 def plot_marking_points(image, marking_points):

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+"""Defines the detector network structure."""
 import torch
 from torch import nn
-from network import define_halve_unit, define_detector_block
+from model.network import define_halve_unit, define_detector_block
 
 
 class YetAnotherDarknet(nn.modules.Module):
