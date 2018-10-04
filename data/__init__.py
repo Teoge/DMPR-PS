@@ -1,6 +1,4 @@
-"""Defines data structure and related functions."""
-from collections import namedtuple
-
-
-MarkingPoint = namedtuple('MarkingPoint', ['x', 'y', 'direction', 'shape'])
-Slot = namedtuple('Slot', ['x1', 'y1', 'x2', 'y2'])
+"""Data related package."""
+from .data_process import get_predicted_points, match_marking_points
+from .dataset import ParkingSlotDataset
+from .struct import MarkingPoint, Slot

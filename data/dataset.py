@@ -4,8 +4,8 @@ import os
 import os.path
 import cv2 as cv
 from torch.utils.data import Dataset
-from torchvision import transforms
-from . import MarkingPoint
+from torchvision.transforms import ToTensor
+from data.struct import MarkingPoint
 
 
 class ParkingSlotDataset(Dataset):
@@ -14,7 +14,7 @@ class ParkingSlotDataset(Dataset):
         super(ParkingSlotDataset, self).__init__()
         self.root = root
         self.sample_names = []
-        self.image_transform = transforms.ToTensor()
+        self.image_transform = ToTensor()
         for file in os.listdir(root):
             if file.endswith(".json"):
                 self.sample_names.append(os.path.splitext(file)[0])

@@ -1,4 +1,5 @@
 """Universal procedure of calculating precision and recall."""
+import bisect
 
 
 def match_gt_with_preds(ground_truth, predictions, match_labels):
@@ -39,16 +40,20 @@ def calc_precision_recall(ground_truths_list, predictions_list, match_labels):
     """Adjust threshold to get mutiple precision recall sample."""
     true_positive_list, false_positive_list = get_confidence_list(
         ground_truths_list, predictions_list, match_labels)
+    true_positive_list = sorted(true_positive_list)
+    false_positive_list = sorted(false_positive_list)
+    thresholds = sorted(list(set(true_positive_list)))
     recalls = [0.]
     precisions = [0.]
-    thresholds = sorted(list(set(true_positive_list)))
     for thresh in reversed(thresholds):
         if thresh == 0.:
             recalls.append(1.)
             precisions.append(0.)
-        true_positives = sum(i >= thresh for i in true_positive_list)
-        false_positives = sum(i >= thresh for i in false_positive_list)
-        false_negatives = len(true_positive_list) - true_positives
+            break
+        false_negatives = bisect.bisect_left(true_positive_list, thresh)
+        true_positives = len(true_positive_list) - false_negatives
+        true_negatives = bisect.bisect_left(false_positive_list, thresh)
+        false_positives = len(false_positive_list) - true_negatives
         recalls.append(true_positives / (true_positives+false_negatives))
         precisions.append(true_positives / (true_positives + false_positives))
     return precisions, recalls

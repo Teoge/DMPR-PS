@@ -9,7 +9,7 @@ NUM_FEATURE_MAP_CHANNEL = 6
 # image_size / 2^5 = 512 / 32 = 16
 FEATURE_MAP_SIZE = 16
 # Thresholds to determine whether an detected point match ground truth.
-SQUARED_DISTANCE_THRESH = 0.0003
+SQUARED_DISTANCE_THRESH = 0.000277778
 DIRECTION_ANGLE_THRESH = 0.5
 
 
@@ -34,11 +34,11 @@ def get_parser_for_training():
                         help="The weights of optimizer.")
     parser.add_argument('--batch_size', type=int, default=24,
                         help="Batch size.")
-    parser.add_argument('--data_loading_workers', type=int, default=24,
+    parser.add_argument('--data_loading_workers', type=int, default=48,
                         help="Number of workers for data loading.")
     parser.add_argument('--num_epochs', type=int, default=100,
                         help="Number of epochs to train for.")
-    parser.add_argument('--lr', type=float, default=1e-3,
+    parser.add_argument('--lr', type=float, default=1e-4,
                         help="The learning rate of back propagation.")
     parser.add_argument('--enable_visdom', action='store_true',
                         help="Enable Visdom to visualize training progress")
@@ -51,12 +51,13 @@ def get_parser_for_evaluation():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_directory', required=True,
                         help="The location of dataset.")
-    parser.add_argument('--batch_size', type=int, default=24,
+    parser.add_argument('--batch_size', type=int, default=32,
                         help="Batch size.")
-    parser.add_argument('--data_loading_workers', type=int, default=24,
+    parser.add_argument('--data_loading_workers', type=int, default=64,
                         help="Number of workers for data loading.")
     parser.add_argument('--enable_visdom', action='store_true',
                         help="Enable Visdom to visualize training progress")
+    add_common_arguments(parser)
     return parser
 
 

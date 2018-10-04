@@ -2,35 +2,7 @@
 import math
 import torch
 import config
-from . import MarkingPoint
-
-
-def generate_objective(marking_points_batch, device):
-    """Get regression objective and gradient for directional point detector."""
-    batch_size = len(marking_points_batch)
-    objective = torch.zeros(batch_size, config.NUM_FEATURE_MAP_CHANNEL,
-                            config.FEATURE_MAP_SIZE, config.FEATURE_MAP_SIZE,
-                            device=device)
-    gradient = torch.zeros_like(objective)
-    gradient[:, 0].fill_(1.)
-    for batch_idx, marking_points in enumerate(marking_points_batch):
-        for marking_point in marking_points:
-            col = math.floor(marking_point.x * 16)
-            row = math.floor(marking_point.y * 16)
-            # Confidence Regression
-            objective[batch_idx, 0, row, col] = 1.
-            # Makring Point Shape Regression
-            objective[batch_idx, 1, row, col] = marking_point.shape
-            # Offset Regression
-            objective[batch_idx, 2, row, col] = marking_point.x*16 - col
-            objective[batch_idx, 3, row, col] = marking_point.y*16 - row
-            # Direction Regression
-            direction = marking_point.direction
-            objective[batch_idx, 4, row, col] = math.cos(direction)
-            objective[batch_idx, 5, row, col] = math.sin(direction)
-            # Assign Gradient
-            gradient[batch_idx, 1:6, row, col].fill_(1.)
-    return objective, gradient
+from data.struct import MarkingPoint
 
 
 def non_maximum_suppression(pred_points):
@@ -55,7 +27,7 @@ def non_maximum_suppression(pred_points):
 
 
 def get_predicted_points(prediction, thresh):
-    """Get marking point from one predicted feature map."""
+    """Get marking points from one predicted feature map."""
     assert isinstance(prediction, torch.Tensor)
     predicted_points = []
     prediction = prediction.detach().cpu().numpy()

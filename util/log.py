@@ -8,12 +8,14 @@ from PIL import ImageDraw
 class Logger():
     """Logger for training."""
 
-    def __init__(self, curve_names=None):
+    def __init__(self, enable_visdom=False, curve_names=None):
         self.curve_names = curve_names
-        if curve_names:
+        if enable_visdom:
             self.vis = Visdom()
             assert self.vis.check_connection()
             self.curve_x = np.array([0])
+        else:
+            self.curve_names = None
 
     def log(self, xval=None, win_name='loss', **kwargs):
         """Log and print the information."""

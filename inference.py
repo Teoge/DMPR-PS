@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from torchvision.transforms import ToTensor
 import config
-from data.data_process import get_predicted_points
-from model.detector import DirectionalPointDetector
+from data import get_predicted_points
+from model import DirectionalPointDetector
 from util import Timer
 
 
@@ -92,9 +92,11 @@ def inference_detector(args):
     """Inference demo of directional point detector."""
     args.cuda = not args.disable_cuda and torch.cuda.is_available()
     device = torch.device('cuda:' + str(args.gpu_id) if args.cuda else 'cpu')
+    torch.set_grad_enabled(False)
     dp_detector = DirectionalPointDetector(
         3, args.depth_factor, config.NUM_FEATURE_MAP_CHANNEL).to(device)
     dp_detector.load_state_dict(torch.load(args.detector_weights))
+    dp_detector.eval()
     if args.mode == "image":
         detect_image(dp_detector, device, args)
     elif args.mode == "video":
