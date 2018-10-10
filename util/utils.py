@@ -1,5 +1,4 @@
 """Utility classes and functions."""
-import math
 import time
 import cv2 as cv
 import torch
@@ -13,6 +12,8 @@ class Timer(object):
     def __init__(self):
         self.start_ticking = False
         self.start = 0.
+        self.count = 0
+        self.total_time = 0.
 
     def tic(self):
         """Start timer."""
@@ -24,6 +25,12 @@ class Timer(object):
         duration = time.time() - self.start
         self.start_ticking = False
         print("Time elapsed:", duration, "s.")
+        self.count += 1
+        self.total_time += duration
+
+    def calc_average_time(self):
+        """Calculate average elapsed time of timer."""
+        return self.total_time / self.count
 
 
 def tensor2array(image_tensor, imtype=np.uint8):

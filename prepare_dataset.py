@@ -109,7 +109,7 @@ def generate_dataset(args):
         centralied_marks = np.array(label['marks'])
         if len(centralied_marks.shape) < 2:
             centralied_marks = np.expand_dims(centralied_marks, axis=0)
-        centralied_marks[:, 0: 4] -= 300.5
+        centralied_marks[:, 0:4] -= 300.5
         if boundary_check(centralied_marks):
             output_name = os.path.join(args.output_directory, name)
             write_image_and_label(output_name, image,

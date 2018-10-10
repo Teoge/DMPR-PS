@@ -8,9 +8,22 @@ INPUT_IMAGE_SIZE = 512
 NUM_FEATURE_MAP_CHANNEL = 6
 # image_size / 2^5 = 512 / 32 = 16
 FEATURE_MAP_SIZE = 16
+# Threshold used to filter marking points too close to image boundary
+BOUNDARY_THRESH = 0.066666667
+
 # Thresholds to determine whether an detected point match ground truth.
 SQUARED_DISTANCE_THRESH = 0.000277778
 DIRECTION_ANGLE_THRESH = 0.5
+
+VSLOT_MIN_DISTANCE = 0.044771278151623496
+VSLOT_MAX_DISTANCE = 0.1099427457599304
+HSLOT_MIN_DISTANCE = 0.15057789144568634
+HSLOT_MAX_DISTANCE = 0.44449496544202816
+
+BRIDGE_ANGLE_DIFF = 0.25
+SEPARATOR_ANGLE_DIFF = 0.5
+
+SLOT_SUPPRESSION_DOT_PRODUCT_THRESH = 0.8
 
 
 def add_common_arguments(parser):
@@ -34,9 +47,9 @@ def get_parser_for_training():
                         help="The weights of optimizer.")
     parser.add_argument('--batch_size', type=int, default=24,
                         help="Batch size.")
-    parser.add_argument('--data_loading_workers', type=int, default=48,
+    parser.add_argument('--data_loading_workers', type=int, default=32,
                         help="Number of workers for data loading.")
-    parser.add_argument('--num_epochs', type=int, default=100,
+    parser.add_argument('--num_epochs', type=int, default=10,
                         help="Number of epochs to train for.")
     parser.add_argument('--lr', type=float, default=1e-4,
                         help="The learning rate of back propagation.")
@@ -61,6 +74,18 @@ def get_parser_for_evaluation():
     return parser
 
 
+def get_parser_for_ps_evaluation():
+    """Return argument parser for testing."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--label_directory', required=True,
+                        help="The location of dataset.")
+    parser.add_argument('--image_directory', required=True,
+                        help="The location of dataset.")
+    parser.add_argument('--enable_visdom', action='store_true',
+                        help="Enable Visdom to visualize training progress")
+    add_common_arguments(parser)
+    return parser
+
 def get_parser_for_inference():
     """Return argument parser for inference."""
     parser = argparse.ArgumentParser()
@@ -68,10 +93,10 @@ def get_parser_for_inference():
                         help="Inference image or video.")
     parser.add_argument('--video',
                         help="Video path if you choose to inference video.")
+    parser.add_argument('--inference_slot', action='store_true',
+                        help="Perform slot inference.")
     parser.add_argument('--thresh', type=float, default=0.5,
                         help="Detection threshold.")
-    parser.add_argument('--timing', action='store_true',
-                        help="Perform timing during reference.")
     parser.add_argument('--save', action='store_true',
                         help="Save detection result to file.")
     add_common_arguments(parser)

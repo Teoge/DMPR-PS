@@ -1,8 +1,9 @@
 """Defines data structure and related function to process these data."""
 import math
+import numpy as np
 import torch
 import config
-from data.struct import MarkingPoint
+from data.struct import MarkingPoint, calc_point_squre_dist, detemine_point_shape
 
 
 def non_maximum_suppression(pred_points):
@@ -10,11 +11,12 @@ def non_maximum_suppression(pred_points):
     suppressed = [False] * len(pred_points)
     for i in range(len(pred_points) - 1):
         for j in range(i + 1, len(pred_points)):
-            dist_square = cal_squre_dist(pred_points[i][1], pred_points[j][1])
-            # TODO: recalculate following parameter
-            # minimum distance in training set: 40.309
-            # (40.309 / 600)^2 = 0.004513376
-            if dist_square < 0.0045:
+            i_x = pred_points[i][1].x
+            i_y = pred_points[i][1].y
+            j_x = pred_points[j][1].x
+            j_y = pred_points[j][1].y
+            # 0.0625 = 1 / 16
+            if abs(j_x - i_x) < 0.0625 and abs(j_y - i_y) < 0.0625:
                 idx = i if pred_points[i][0] < pred_points[j][0] else j
                 suppressed[idx] = True
     if any(suppressed):
@@ -36,6 +38,9 @@ def get_predicted_points(prediction, thresh):
             if prediction[0, i, j] >= thresh:
                 xval = (j + prediction[2, i, j]) / prediction.shape[2]
                 yval = (i + prediction[3, i, j]) / prediction.shape[1]
+                if not (config.BOUNDARY_THRESH <= xval <= 1-config.BOUNDARY_THRESH
+                        and config.BOUNDARY_THRESH <= yval <= 1-config.BOUNDARY_THRESH):
+                    continue
                 cos_value = prediction[4, i, j]
                 sin_value = prediction[5, i, j]
                 direction = math.atan2(sin_value, cos_value)
@@ -45,24 +50,57 @@ def get_predicted_points(prediction, thresh):
     return non_maximum_suppression(predicted_points)
 
 
-def cal_squre_dist(point_a, point_b):
-    """Calculate distance between two marking points."""
-    distx = point_a.x - point_b.x
-    disty = point_a.y - point_b.y
-    return distx ** 2 + disty ** 2
+def pair_marking_points(point_a, point_b):
+    distance = calc_point_squre_dist(point_a, point_b)
+    if not (config.VSLOT_MIN_DISTANCE <= distance <= config.VSLOT_MAX_DISTANCE
+            or config.HSLOT_MIN_DISTANCE <= distance <= config.HSLOT_MAX_DISTANCE):
+        return 0
+    vector_ab = np.array([point_b.x - point_a.x, point_b.y - point_a.y])
+    vector_ab = vector_ab / np.linalg.norm(vector_ab)
+    point_shape_a = detemine_point_shape(point_a, vector_ab)
+    point_shape_b = detemine_point_shape(point_b, -vector_ab)
+    if point_shape_a.value == 0 or point_shape_b.value == 0:
+        return 0
+    if point_shape_a.value == 3 and point_shape_b.value == 3:
+        return 0
+    if point_shape_a.value > 3 and point_shape_b.value > 3:
+        return 0
+    if point_shape_a.value < 3 and point_shape_b.value < 3:
+        return 0
+    if point_shape_a.value != 3:
+        if point_shape_a.value > 3:
+            return 1
+        if point_shape_a.value < 3:
+            return -1
+    if point_shape_a.value == 3:
+        if point_shape_b.value < 3:
+            return 1
+        if point_shape_b.value > 3:
+            return -1
 
 
-def cal_direction_angle(point_a, point_b):
-    """Calculate angle between direction in rad."""
-    angle = abs(point_a.direction - point_b.direction)
-    if angle > math.pi:
-        angle = 2*math.pi - angle
-    return angle
-
-
-def match_marking_points(point_a, point_b):
-    """Determine whether a detected point match ground truth."""
-    dist_square = cal_squre_dist(point_a, point_b)
-    angle = cal_direction_angle(point_a, point_b)
-    return (dist_square < config.SQUARED_DISTANCE_THRESH
-            and angle < config.DIRECTION_ANGLE_THRESH)
+def filter_slots(marking_points, slots):
+    suppressed = [False] * len(slots)
+    for i, slot in enumerate(slots):
+        x1 = marking_points[slot[0]].x
+        y1 = marking_points[slot[0]].y
+        x2 = marking_points[slot[1]].x
+        y2 = marking_points[slot[1]].y
+        for point_idx, point in enumerate(marking_points):
+            if point_idx == slot[0] or point_idx == slot[1]:
+                continue
+            x0 = point.x
+            y0 = point.y
+            vec1 = np.array([x0 - x1, y0 - y1])
+            vec2 = np.array([x2 - x0, y2 - y0])
+            vec1 = vec1 / np.linalg.norm(vec1)
+            vec2 = vec2 / np.linalg.norm(vec2)
+            if np.dot(vec1, vec2) > config.SLOT_SUPPRESSION_DOT_PRODUCT_THRESH:
+                suppressed[i] = True
+    if any(suppressed):
+        unsupres_slots = []
+        for i, supres in enumerate(suppressed):
+            if not supres:
+                unsupres_slots.append(slots[i])
+        return unsupres_slots
+    return slots
