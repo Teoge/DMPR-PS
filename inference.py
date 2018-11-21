@@ -5,13 +5,13 @@ import numpy as np
 import torch
 from torchvision.transforms import ToTensor
 import config
-from data import get_predicted_points, pair_marking_points, filter_slots
+from data import get_predicted_points, pair_marking_points, calc_point_squre_dist, pass_through_third_point
 from model import DirectionalPointDetector
 from util import Timer
 
 
 def plot_points(image, pred_points):
-    """Plot marking points on the image and show."""
+    """Plot marking points on the image."""
     if not pred_points:
         return
     height = image.shape[0]
@@ -33,18 +33,19 @@ def plot_points(image, pred_points):
         p1_y = int(round(p1_y))
         p2_x = int(round(p2_x))
         p2_y = int(round(p2_y))
-        cv.line(image, (p0_x, p0_y), (p1_x, p1_y), (0, 0, 255))
+        cv.line(image, (p0_x, p0_y), (p1_x, p1_y), (0, 0, 255), 2)
         cv.putText(image, str(confidence), (p0_x, p0_y),
                    cv.FONT_HERSHEY_PLAIN, 1, (0, 0, 0))
         if marking_point.shape > 0.5:
-            cv.line(image, (p0_x, p0_y), (p2_x, p2_y), (0, 0, 255))
+            cv.line(image, (p0_x, p0_y), (p2_x, p2_y), (0, 0, 255), 2)
         else:
             p3_x = int(round(p3_x))
             p3_y = int(round(p3_y))
-            cv.line(image, (p2_x, p2_y), (p3_x, p3_y), (0, 0, 255))
+            cv.line(image, (p2_x, p2_y), (p3_x, p3_y), (0, 0, 255), 2)
 
 
 def plot_slots(image, pred_points, slots):
+    """Plot parking slots on the image."""
     if not pred_points or not slots:
         return
     marking_points = list(list(zip(*pred_points))[1])
@@ -71,9 +72,9 @@ def plot_slots(image, pred_points, slots):
         p2_y = int(round(p2_y))
         p3_x = int(round(p3_x))
         p3_y = int(round(p3_y))
-        cv.line(image, (p0_x, p0_y), (p1_x, p1_y), (255, 0, 0))
-        cv.line(image, (p0_x, p0_y), (p2_x, p2_y), (255, 0, 0))
-        cv.line(image, (p1_x, p1_y), (p3_x, p3_y), (255, 0, 0))
+        cv.line(image, (p0_x, p0_y), (p1_x, p1_y), (255, 0, 0), 2)
+        cv.line(image, (p0_x, p0_y), (p2_x, p2_y), (255, 0, 0), 2)
+        cv.line(image, (p1_x, p1_y), (p3_x, p3_y), (255, 0, 0), 2)
 
 
 def preprocess_image(image):
@@ -95,12 +96,21 @@ def inference_slots(marking_points):
     slots = []
     for i in range(num_detected - 1):
         for j in range(i + 1, num_detected):
-            result = pair_marking_points(marking_points[i], marking_points[j])
+            point_i = marking_points[i]
+            point_j = marking_points[j]
+            # Step 1: length filtration.
+            distance = calc_point_squre_dist(point_i, point_j)
+            if not (config.VSLOT_MIN_DIST <= distance <= config.VSLOT_MAX_DIST
+                    or config.HSLOT_MIN_DIST <= distance <= config.HSLOT_MAX_DIST):
+                continue
+            # Step 2: pass through filtration.
+            if pass_through_third_point(marking_points, i, j):
+                continue
+            result = pair_marking_points(point_i, point_j)
             if result == 1:
                 slots.append((i, j))
             elif result == -1:
                 slots.append((j, i))
-    slots = filter_slots(marking_points, slots)
     return slots
 
 
@@ -114,7 +124,7 @@ def detect_video(detector, device, args):
     if args.save:
         output_video.open('record.avi', cv.VideoWriter_fourcc(*'MJPG'),
                           input_video.get(cv.CAP_PROP_FPS),
-                          (frame_width, frame_height))
+                          (frame_width, frame_height), True)
     frame = np.empty([frame_height, frame_width, 3], dtype=np.uint8)
     while input_video.read(frame)[0]:
         timer.tic()
@@ -145,6 +155,7 @@ def detect_image(detector, device, args):
         timer.tic()
         pred_points = detect_marking_points(
             detector, image, args.thresh, device)
+        slots = None
         if pred_points and args.inference_slot:
             marking_points = list(list(zip(*pred_points))[1])
             slots = inference_slots(marking_points)

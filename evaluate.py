@@ -1,12 +1,45 @@
 """Evaluate directional marking point detector."""
+import cv2 as cv
 import torch
-from torch.utils.data import DataLoader
 import config
 import util
-from data import get_predicted_points, match_marking_points
+from data import get_predicted_points, match_marking_points, calc_point_squre_dist, calc_point_direction_angle
 from data import ParkingSlotDataset
+from inference import plot_points
 from model import DirectionalPointDetector
 from train import generate_objective
+
+
+def is_gt_and_pred_matched(ground_truths, predictions, thresh):
+    """Check if there is any false positive or false negative."""
+    predictions = [pred for pred in predictions if pred[0] >= thresh]
+    prediction_matched = [False] * len(predictions)
+    for ground_truth in ground_truths:
+        idx = util.match_gt_with_preds(ground_truth, predictions,
+                                       match_marking_points)
+        if idx < 0:
+            return False
+        prediction_matched[idx] = True
+    if not all(prediction_matched):
+        return False
+    return True
+
+
+def collect_error(ground_truths, predictions, thresh):
+    """Collect errors for those correctly detected points."""
+    dists = []
+    angles = []
+    predictions = [pred for pred in predictions if pred[0] >= thresh]
+    for ground_truth in ground_truths:
+        idx = util.match_gt_with_preds(ground_truth, predictions,
+                                       match_marking_points)
+        if idx >= 0:
+            detected_point = predictions[idx][1]
+            dists.append(calc_point_squre_dist(detected_point, ground_truth))
+            angles.append(calc_point_direction_angle(detected_point, ground_truth))
+        else:
+            continue
+    return dists, angles
 
 
 def evaluate_detector(args):
@@ -21,30 +54,37 @@ def evaluate_detector(args):
         dp_detector.load_state_dict(torch.load(args.detector_weights))
     dp_detector.eval()
 
-    torch.multiprocessing.set_sharing_strategy('file_system')
-    data_loader = DataLoader(ParkingSlotDataset(args.dataset_directory),
-                             batch_size=args.batch_size, shuffle=True,
-                             num_workers=args.data_loading_workers,
-                             collate_fn=lambda x: list(zip(*x)))
+    psdataset = ParkingSlotDataset(args.dataset_directory)
     logger = util.Logger(enable_visdom=args.enable_visdom)
 
     total_loss = 0
-    num_evaluation = 0
+    position_errors = []
+    direction_errors = []
     ground_truths_list = []
     predictions_list = []
-    for iter_idx, (image, marking_points) in enumerate(data_loader):
-        image = torch.stack(image)
-        image = image.to(device)
-        ground_truths_list += list(marking_points)
+    for iter_idx, (image, marking_points) in enumerate(psdataset):
+        ground_truths_list.append(marking_points)
 
+        image = torch.unsqueeze(image, 0).to(device)
         prediction = dp_detector(image)
-        objective, gradient = generate_objective(marking_points, device)
+        objective, gradient = generate_objective([marking_points], device)
         loss = (prediction - objective) ** 2
         total_loss += torch.sum(loss*gradient).item()
-        num_evaluation += loss.size(0)
 
-        pred_points = [get_predicted_points(pred, 0.01) for pred in prediction]
-        predictions_list += pred_points
+        pred_points = get_predicted_points(prediction[0], 0.01)
+        predictions_list.append(pred_points)
+
+        # if not is_gt_and_pred_matched(marking_points, pred_points,
+        #                               config.CONFID_THRESH_FOR_POINT):
+        #     cvimage = util.tensor2array(image[0]).copy()
+        #     plot_points(cvimage, pred_points)
+        #     cv.imwrite('flaw/%d.jpg' % iter_idx, cvimage,
+        #                [int(cv.IMWRITE_JPEG_QUALITY), 100])
+        dists, angles = collect_error(marking_points, pred_points,
+                                      config.CONFID_THRESH_FOR_POINT)
+        position_errors += dists
+        direction_errors += angles
+
         logger.log(iter=iter_idx, total_loss=total_loss)
 
     precisions, recalls = util.calc_precision_recall(
@@ -52,7 +92,7 @@ def evaluate_detector(args):
     average_precision = util.calc_average_precision(precisions, recalls)
     if args.enable_visdom:
         logger.plot_curve(precisions, recalls)
-    logger.log(average_loss=total_loss / num_evaluation,
+    logger.log(average_loss=total_loss / len(psdataset),
                average_precision=average_precision)
 
 

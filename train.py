@@ -69,8 +69,7 @@ def train_detector(args):
         print("Loading weights: %s" % args.optimizer_weights)
         optimizer.load_state_dict(torch.load(args.optimizer_weights))
 
-    logger = util.Logger(args.enable_visdom,
-                         ['train_loss'] if args.enable_visdom else None)
+    logger = util.Logger(args.enable_visdom, ['train_loss'])
     data_loader = DataLoader(data.ParkingSlotDataset(args.dataset_directory),
                              batch_size=args.batch_size, shuffle=True,
                              num_workers=args.data_loading_workers,
@@ -78,8 +77,7 @@ def train_detector(args):
 
     for epoch_idx in range(args.num_epochs):
         for iter_idx, (image, marking_points) in enumerate(data_loader):
-            image = torch.stack(image)
-            image = image.to(device)
+            image = torch.stack(image).to(device)
 
             optimizer.zero_grad()
             prediction = dp_detector(image)

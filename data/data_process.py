@@ -3,7 +3,7 @@ import math
 import numpy as np
 import torch
 import config
-from data.struct import MarkingPoint, calc_point_squre_dist, detemine_point_shape
+from data.struct import MarkingPoint, detemine_point_shape
 
 
 def non_maximum_suppression(pred_points):
@@ -50,11 +50,28 @@ def get_predicted_points(prediction, thresh):
     return non_maximum_suppression(predicted_points)
 
 
+def pass_through_third_point(marking_points, i, j):
+    """See whether the line between two points pass through a third point."""
+    x_1 = marking_points[i].x
+    y_1 = marking_points[i].y
+    x_2 = marking_points[j].x
+    y_2 = marking_points[j].y
+    for point_idx, point in enumerate(marking_points):
+        if point_idx == i or point_idx == j:
+            continue
+        x_0 = point.x
+        y_0 = point.y
+        vec1 = np.array([x_0 - x_1, y_0 - y_1])
+        vec2 = np.array([x_2 - x_0, y_2 - y_0])
+        vec1 = vec1 / np.linalg.norm(vec1)
+        vec2 = vec2 / np.linalg.norm(vec2)
+        if np.dot(vec1, vec2) > config.SLOT_SUPPRESSION_DOT_PRODUCT_THRESH:
+            return True
+    return False
+
+
 def pair_marking_points(point_a, point_b):
-    distance = calc_point_squre_dist(point_a, point_b)
-    if not (config.VSLOT_MIN_DISTANCE <= distance <= config.VSLOT_MAX_DISTANCE
-            or config.HSLOT_MIN_DISTANCE <= distance <= config.HSLOT_MAX_DISTANCE):
-        return 0
+    """See whether two marking points form a slot."""
     vector_ab = np.array([point_b.x - point_a.x, point_b.y - point_a.y])
     vector_ab = vector_ab / np.linalg.norm(vector_ab)
     point_shape_a = detemine_point_shape(point_a, vector_ab)
@@ -77,30 +94,3 @@ def pair_marking_points(point_a, point_b):
             return 1
         if point_shape_b.value > 3:
             return -1
-
-
-def filter_slots(marking_points, slots):
-    suppressed = [False] * len(slots)
-    for i, slot in enumerate(slots):
-        x1 = marking_points[slot[0]].x
-        y1 = marking_points[slot[0]].y
-        x2 = marking_points[slot[1]].x
-        y2 = marking_points[slot[1]].y
-        for point_idx, point in enumerate(marking_points):
-            if point_idx == slot[0] or point_idx == slot[1]:
-                continue
-            x0 = point.x
-            y0 = point.y
-            vec1 = np.array([x0 - x1, y0 - y1])
-            vec2 = np.array([x2 - x0, y2 - y0])
-            vec1 = vec1 / np.linalg.norm(vec1)
-            vec2 = vec2 / np.linalg.norm(vec2)
-            if np.dot(vec1, vec2) > config.SLOT_SUPPRESSION_DOT_PRODUCT_THRESH:
-                suppressed[i] = True
-    if any(suppressed):
-        unsupres_slots = []
-        for i, supres in enumerate(suppressed):
-            if not supres:
-                unsupres_slots.append(slots[i])
-        return unsupres_slots
-    return slots

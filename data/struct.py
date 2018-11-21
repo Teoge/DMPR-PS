@@ -20,11 +20,13 @@ class PointShape(Enum):
 
 
 def direction_diff(direction_a, direction_b):
+    """Calculate the angle between two direction."""
     diff = abs(direction_a - direction_b)
     return diff if diff < math.pi else 2*math.pi - diff
 
 
 def detemine_point_shape(point, vector):
+    """Determine which category the point is in."""
     vec_direct = math.atan2(vector[1], vector[0])
     vec_direct_up = math.atan2(-vector[0], vector[1])
     vec_direct_down = math.atan2(vector[0], -vector[1])
@@ -59,6 +61,10 @@ def match_marking_points(point_a, point_b):
     """Determine whether a detected point match ground truth."""
     dist_square = calc_point_squre_dist(point_a, point_b)
     angle = calc_point_direction_angle(point_a, point_b)
+    if point_a.shape > 0.5 and point_b.shape < 0.5:
+        return False
+    if point_a.shape < 0.5 and point_b.shape > 0.5:
+        return False
     return (dist_square < config.SQUARED_DISTANCE_THRESH
             and angle < config.DIRECTION_ANGLE_THRESH)
 
