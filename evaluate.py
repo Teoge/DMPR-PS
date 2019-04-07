@@ -1,11 +1,9 @@
 """Evaluate directional marking point detector."""
-import cv2 as cv
 import torch
 import config
 import util
 from data import get_predicted_points, match_marking_points, calc_point_squre_dist, calc_point_direction_angle
 from data import ParkingSlotDataset
-from inference import plot_points
 from model import DirectionalPointDetector
 from train import generate_objective
 
@@ -74,12 +72,6 @@ def evaluate_detector(args):
         pred_points = get_predicted_points(prediction[0], 0.01)
         predictions_list.append(pred_points)
 
-        # if not is_gt_and_pred_matched(marking_points, pred_points,
-        #                               config.CONFID_THRESH_FOR_POINT):
-        #     cvimage = util.tensor2array(image[0]).copy()
-        #     plot_points(cvimage, pred_points)
-        #     cv.imwrite('flaw/%d.jpg' % iter_idx, cvimage,
-        #                [int(cv.IMWRITE_JPEG_QUALITY), 100])
         dists, angles = collect_error(marking_points, pred_points,
                                       config.CONFID_THRESH_FOR_POINT)
         position_errors += dists

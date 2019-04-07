@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Class for logging."""
 import math
 import numpy as np
 from visdom import Visdom

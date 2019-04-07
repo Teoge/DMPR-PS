@@ -1,4 +1,4 @@
-"""Defines data structure and related function to process these data."""
+"""Defines related function to process defined data structure."""
 import math
 import numpy as np
 import torch

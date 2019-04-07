@@ -12,6 +12,7 @@ from inference import detect_marking_points, inference_slots
 
 
 def get_ground_truths(label):
+    """Read label to get ground truth slot."""
     slots = np.array(label['slots'])
     if slots.size == 0:
         return []

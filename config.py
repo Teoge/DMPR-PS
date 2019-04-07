@@ -1,6 +1,7 @@
 """Configurate arguments."""
 import argparse
 
+# TODO: reproduce all number
 
 INPUT_IMAGE_SIZE = 512
 # 0: confidence, 1: point_shape, 2: offset_x, 3: offset_y, 4: cos(direction),
@@ -20,7 +21,10 @@ VSLOT_MAX_DIST = 0.1099427457599304
 HSLOT_MIN_DIST = 0.15057789144568634
 HSLOT_MAX_DIST = 0.44449496544202816
 
-# angle_prediction_error = 0.1384059287593468
+SHORT_SEPARATOR_LENGTH = 0.199519231
+LONG_SEPARATOR_LENGTH = 0.46875
+
+# angle_prediction_error = 0.1384059287593468 collected from evaluate.py
 BRIDGE_ANGLE_DIFF = 0.09757113548987695 + 0.1384059287593468
 SEPARATOR_ANGLE_DIFF = 0.284967562063968 + 0.1384059287593468
 
@@ -52,7 +56,7 @@ def get_parser_for_training():
                         help="Batch size.")
     parser.add_argument('--data_loading_workers', type=int, default=32,
                         help="Number of workers for data loading.")
-    parser.add_argument('--num_epochs', type=int, default=10,
+    parser.add_argument('--num_epochs', type=int, default=20,
                         help="Number of epochs to train for.")
     parser.add_argument('--lr', type=float, default=1e-4,
                         help="The learning rate of back propagation.")
@@ -67,10 +71,6 @@ def get_parser_for_evaluation():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_directory', required=True,
                         help="The location of dataset.")
-    parser.add_argument('--batch_size', type=int, default=32,
-                        help="Batch size.")
-    parser.add_argument('--data_loading_workers', type=int, default=64,
-                        help="Number of workers for data loading.")
     parser.add_argument('--enable_visdom', action='store_true',
                         help="Enable Visdom to visualize training progress")
     add_common_arguments(parser)
@@ -88,6 +88,7 @@ def get_parser_for_ps_evaluation():
                         help="Enable Visdom to visualize training progress")
     add_common_arguments(parser)
     return parser
+
 
 def get_parser_for_inference():
     """Return argument parser for inference."""

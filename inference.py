@@ -60,10 +60,15 @@ def plot_slots(image, pred_points, slots):
         p1_y = height * point_b.y - 0.5
         vec = np.array([p1_x - p0_x, p1_y - p0_y])
         vec = vec / np.linalg.norm(vec)
-        p2_x = p0_x + 200*vec[1]
-        p2_y = p0_y - 200*vec[0]
-        p3_x = p1_x + 200*vec[1]
-        p3_y = p1_y - 200*vec[0]
+        distance = calc_point_squre_dist(point_a, point_b)
+        if config.VSLOT_MIN_DIST <= distance <= config.VSLOT_MAX_DIST:
+            separating_length = config.LONG_SEPARATOR_LENGTH
+        elif config.HSLOT_MIN_DIST <= distance <= config.HSLOT_MAX_DIST:
+            separating_length = config.SHORT_SEPARATOR_LENGTH
+        p2_x = p0_x + height * separating_length * vec[1]
+        p2_y = p0_y - width * separating_length * vec[0]
+        p3_x = p1_x + height * separating_length * vec[1]
+        p3_y = p1_y - width * separating_length * vec[0]
         p0_x = int(round(p0_x))
         p0_y = int(round(p0_y))
         p1_x = int(round(p1_x))
@@ -122,7 +127,7 @@ def detect_video(detector, device, args):
     frame_height = int(input_video.get(cv.CAP_PROP_FRAME_HEIGHT))
     output_video = cv.VideoWriter()
     if args.save:
-        output_video.open('record.avi', cv.VideoWriter_fourcc(*'MJPG'),
+        output_video.open('record.avi', cv.VideoWriter_fourcc(*'XVID'),
                           input_video.get(cv.CAP_PROP_FPS),
                           (frame_width, frame_height), True)
     frame = np.empty([frame_height, frame_width, 3], dtype=np.uint8)

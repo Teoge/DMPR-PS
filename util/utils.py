@@ -30,6 +30,8 @@ class Timer(object):
 
     def calc_average_time(self):
         """Calculate average elapsed time of timer."""
+        if self.count == 0:
+            return 0.
         return self.total_time / self.count
 
 
