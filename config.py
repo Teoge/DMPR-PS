@@ -1,7 +1,7 @@
 """Configurate arguments."""
 import argparse
 
-# TODO: reproduce all number
+# Threholds are collected by `collect_thresholds.py`.
 
 INPUT_IMAGE_SIZE = 512
 # 0: confidence, 1: point_shape, 2: offset_x, 3: offset_y, 4: cos(direction),
