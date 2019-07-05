@@ -34,7 +34,8 @@ def collect_error(ground_truths, predictions, thresh):
         if idx >= 0:
             detected_point = predictions[idx][1]
             dists.append(calc_point_squre_dist(detected_point, ground_truth))
-            angles.append(calc_point_direction_angle(detected_point, ground_truth))
+            angles.append(calc_point_direction_angle(
+                detected_point, ground_truth))
         else:
             continue
     return dists, angles

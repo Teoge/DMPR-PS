@@ -33,6 +33,7 @@ SLOT_SUPPRESSION_DOT_PRODUCT_THRESH = 0.8
 # precision = 0.995585, recall = 0.995805
 CONFID_THRESH_FOR_POINT = 0.11676871
 
+
 def add_common_arguments(parser):
     """Add common arguments for training and inference."""
     parser.add_argument('--detector_weights',

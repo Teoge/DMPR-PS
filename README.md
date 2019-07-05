@@ -74,7 +74,7 @@ View `config.py` for more argument details (batch size, learning rate, etc).
 * Evaluate parking-slot detection
 
     ```(shell)
-    python evaluate.py --label_directory $LABEL_DIRECTORY --image_directory $IMAGE_DIRECTORY --detector_weights $DETECTOR_WEIGHTS
+    python ps_evaluate.py --label_directory $LABEL_DIRECTORY --image_directory $IMAGE_DIRECTORY --detector_weights $DETECTOR_WEIGHTS
     ```
 
     `LABEL_DIRECTORY` is the directory containing testing json labels.  
