@@ -4,13 +4,10 @@ This is the implementation of DMPR-PS using PyTorch.
 
 ## Requirements
 
-* CUDA
 * PyTorch
-* OpenCV
-* NumPy
-* Pillow
-* Visdom (optional)
-* Matplotlib (optional)
+* CUDA (optional)
+* Other requirements  
+    `pip install -r requirements.txt`
 
 ## Pre-trained weights
 
@@ -30,8 +27,8 @@ The [pre-trained weights](https://drive.google.com/open?id=1OuyF8bGttA11-CKJ4Mj3
     python inference.py --mode video --detector_weights $DETECTOR_WEIGHTS --video $VIDEO
     ```
 
-    `DETECTOR_WEIGHTS` is the trained weights of detector.  
-    `VIDEO` is path to the video.  
+    Argument `DETECTOR_WEIGHTS` is the trained weights of detector.  
+    Argument `VIDEO` is path to the video.  
     View `config.py` for more argument details.
 
 ## Prepare data
@@ -45,9 +42,9 @@ The [pre-trained weights](https://drive.google.com/open?id=1OuyF8bGttA11-CKJ4Mj3
     python prepare_dataset.py --dataset test --label_directory $LABEL_DIRECTORY --image_directory $IMAGE_DIRECTORY --output_directory $OUTPUT_DIRECTORY
     ```
 
-    `LABEL_DIRECTORY` is the directory containing json labels.  
-    `IMAGE_DIRECTORY` is the directory containing jpg images.  
-    `OUTPUT_DIRECTORY` is the directory where output images and labels are.  
+    Argument `LABEL_DIRECTORY` is the directory containing json labels.  
+    Argument `IMAGE_DIRECTORY` is the directory containing jpg images.  
+    Argument `OUTPUT_DIRECTORY` is the directory where output images and labels are.  
     View `prepare_dataset.py` for more argument details.
 
 ## Train
@@ -56,7 +53,7 @@ The [pre-trained weights](https://drive.google.com/open?id=1OuyF8bGttA11-CKJ4Mj3
 python train.py --dataset_directory $TRAIN_DIRECTORY
 ```
 
-`TRAIN_DIRECTORY` is the train directory generated in data preparation.  
+Argument `TRAIN_DIRECTORY` is the train directory generated in data preparation.  
 View `config.py` for more argument details (batch size, learning rate, etc).
 
 ## Evaluate
@@ -67,8 +64,8 @@ View `config.py` for more argument details (batch size, learning rate, etc).
     python evaluate.py --dataset_directory $TEST_DIRECTORY --detector_weights $DETECTOR_WEIGHTS
     ```
 
-    `TEST_DIRECTORY` is the test directory generated in data preparation.  
-    `DETECTOR_WEIGHTS` is the trained weights of detector.  
+    Argument `TEST_DIRECTORY` is the test directory generated in data preparation.  
+    Argument `DETECTOR_WEIGHTS` is the trained weights of detector.  
     View `config.py` for more argument details (batch size, learning rate, etc).
 
 * Evaluate parking-slot detection
@@ -77,7 +74,22 @@ View `config.py` for more argument details (batch size, learning rate, etc).
     python ps_evaluate.py --label_directory $LABEL_DIRECTORY --image_directory $IMAGE_DIRECTORY --detector_weights $DETECTOR_WEIGHTS
     ```
 
-    `LABEL_DIRECTORY` is the directory containing testing json labels.  
-    `IMAGE_DIRECTORY` is the directory containing testing jpg images.  
-    `DETECTOR_WEIGHTS` is the trained weights of detector.  
+    Argument `LABEL_DIRECTORY` is the directory containing testing json labels.  
+    Argument `IMAGE_DIRECTORY` is the directory containing testing jpg images.  
+    Argument `DETECTOR_WEIGHTS` is the trained weights of detector.  
     View `config.py` for more argument details.
+
+## Citing DMPR-PS
+
+If you find DMPR-PS useful in your research, please consider citing:
+
+```()
+@inproceedings{DMPR-PS,
+Author = {Junhao Huang and Lin Zhang and Ying Shen and Huijuan Zhang and Shengjie Zhao and Yukai Yang},
+Booktitle = {2019 IEEE International Conference on Multimedia and Expo (ICME)},
+Title = {{DMPR-PS}: A novel approach for parking-slot detection using directional marking-point regression},
+Month = {Jul.},
+Year = {2019},
+Pages = {212-217}
+}
+```

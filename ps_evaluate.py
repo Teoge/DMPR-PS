@@ -53,6 +53,7 @@ def psevaluate_detector(args):
         image = cv.imread(os.path.join(args.image_directory, name + '.jpg'))
         pred_points = detect_marking_points(
             dp_detector, image, config.CONFID_THRESH_FOR_POINT, device)
+        slots = []
         if pred_points:
             marking_points = list(list(zip(*pred_points))[1])
             slots = inference_slots(marking_points)

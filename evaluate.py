@@ -2,6 +2,7 @@
 import torch
 import config
 import util
+from thop import profile
 from data import get_predicted_points, match_marking_points, calc_point_squre_dist, calc_point_direction_angle
 from data import ParkingSlotDataset
 from model import DirectionalPointDetector
@@ -85,8 +86,14 @@ def evaluate_detector(args):
     average_precision = util.calc_average_precision(precisions, recalls)
     if args.enable_visdom:
         logger.plot_curve(precisions, recalls)
+
+    sample = torch.randn(1, 3, config.INPUT_IMAGE_SIZE,
+                         config.INPUT_IMAGE_SIZE)
+    flops, params = profile(dp_detector, inputs=(sample.to(device), ))
     logger.log(average_loss=total_loss / len(psdataset),
-               average_precision=average_precision)
+               average_precision=average_precision,
+               flops=flops,
+               params=params)
 
 
 if __name__ == '__main__':
