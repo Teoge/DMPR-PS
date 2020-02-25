@@ -34,7 +34,8 @@ The [pre-trained weights](https://drive.google.com/open?id=1OuyF8bGttA11-CKJ4Mj3
 ## Prepare data
 
 1. Download ps2.0 from [here](https://cslinzhang.github.io/deepps/), and extract.
-2. Download the [labels](https://drive.google.com/open?id=1o6yXxc3RjIs6r01LtwMS_zH91Tk9BFRB), and extract.
+2. Download the [labels](https://drive.google.com/open?id=1o6yXxc3RjIs6r01LtwMS_zH91Tk9BFRB), and extract.  
+(In case you want to label your own data, you can use [`directional_point` branch of my labeling tool **MarkToolForParkingLotPoint**](https://github.com/Teoge/MarkToolForParkingLotPoint/tree/directional_point).)
 3. Perform data preparation and augmentation:
 
     ```(shell)
