@@ -18,13 +18,13 @@ The [pre-trained weights](https://drive.google.com/open?id=1OuyF8bGttA11-CKJ4Mj3
 * Image inference
 
     ```(shell)
-    python inference.py --mode image --detector_weights $DETECTOR_WEIGHTS
+    python inference.py --mode image --detector_weights $DETECTOR_WEIGHTS --inference_slot
     ```
 
 * Video inference
 
     ```(shell)
-    python inference.py --mode video --detector_weights $DETECTOR_WEIGHTS --video $VIDEO
+    python inference.py --mode video --detector_weights $DETECTOR_WEIGHTS --video $VIDEO --inference_slot
     ```
 
     Argument `DETECTOR_WEIGHTS` is the trained weights of detector.  
