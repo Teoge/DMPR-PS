@@ -1,6 +1,6 @@
 # DMPR-PS
 
-This is the implementation of DMPR-PS using PyTorch.
+This is the implementation of [DMPR-PS](https://github.com/Teoge/DMPR-PS/blob/master/DMPR-PS.pdf) using PyTorch.
 
 ## Requirements
 
